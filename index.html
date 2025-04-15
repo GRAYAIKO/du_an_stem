@@ -1,33 +1,301 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dự Báo Thời Tiết Thông Minh</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dự Báo Thời Tiết Thông Minh</title>
+  <style>
+* {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #71b7e6, #9b59b6);
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            width: 70%;
+            font-size: 1em;
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        input[type="text"]::placeholder {
+            color: #ddd;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #3498db;
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .weather-info {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .weather-info h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .weather-info p {
+            font-size: 1.2em;
+            margin: 8px 0;
+        }
+
+        .weather-icon {
+            width: 100px;
+            margin: 10px auto;
+        }
+
+        .suggestions {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+
+        .suggestions h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            font-size: 1.1em;
+        }
+
+        .suggestions li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            input[type="text"], button {
+                font-size: 0.9em;
+            }
+        }
+
+        /* Thêm class 'error' vào CSS */
+        .error {
+            font-size: 1.5em;
+            animation: shakeInput 0.5s;
+            color: red;
+        }
+
+        .error-container {
+            animation: shakeContainer 0.5s;
+        }
+
+        @keyframes shakeInput {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes shakeContainer {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(10px); }
+            50% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+            100% { transform: translateX(0); }
+        }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Dự Báo Thời Tiết Thông Minh</h1>
-        <div class="search-box">
-            <input type="text" id="cityInput" placeholder="Nhập tên thành phố...">
-            <button onclick="getWeather()">Tìm</button>
-        </div>
-        <div id="error-message" style="color: red; margin-top: 5px;"></div>
-        <div class="weather-info" id="weatherInfo">
-            <h2 id="cityName"></h2>
-            <img id="weatherIcon" class="weather-icon" alt="Weather Icon">
-            <p id="temperature"></p>
-            <p id="description"></p>
-            <p id="humidity"></p>
-            <p id="wind"></p>
-            <div class="suggestions" id="suggestions">
-                <h3>Gợi ý hoạt động</h3>
-                <ul id="suggestionList"></ul>
-            </div>
-        </div>
+  <div class="container" id="container">
+    <h1>Dự Báo Thời Tiết Thông Minh</h1>
+    <div class="search-box">
+      <input type="text" id="locationInput" placeholder="Nhập xã, huyện, tỉnh...">
+      <button onclick="getWeather()">Tìm</button>
     </div>
+    <div id="error-message" style="color: red; margin-top: 5px;"></div>
+    <div class="weather-info" id="weatherInfo">
+      <h2 id="locationName"></h2>
+      <img id="weatherIcon" class="weather-icon" alt="Weather Icon">
+      <p id="temperature"></p>
+      <p id="description"></p>
+      <p id="humidity"></p>
+      <p id="wind"></p>
+      <div class="suggestions" id="suggestions">
+        <h3>Gợi ý hoạt động</h3>
+        <ul id="suggestionList"></ul>
+      </div>
+    </div>
+  </div>
 
-    <script src="script.js"></script>
+  <script>
+    const apiKey = '23de87e7be7570d22175de1e92feb8bb'; // OpenWeatherMap key
+    const locationInput = document.getElementById("locationInput");
+    const weatherInfo = document.getElementById("weatherInfo");
+    const errorMessage = document.getElementById("error-message");
+    const container = document.getElementById("container");
+
+    locationInput.addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') {
+            getWeather();
+        }
+    });
+
+    async function getWeather() {
+        const location = locationInput.value;
+
+        // Reset error state
+        locationInput.classList.remove('error');
+        container.classList.remove('error-container');
+        errorMessage.textContent = '';
+        locationInput.placeholder = "Nhập xã, huyện, tỉnh...";
+
+        if (!location) {
+            locationInput.classList.add('error');
+            container.classList.add('error-container');
+            errorMessage.textContent = "Vui lòng nhập tên xã/huyện/tỉnh!";
+            return;
+        }
+
+        const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`;
+
+        try {
+            const geoRes = await fetch(geoUrl);
+            const geoData = await geoRes.json();
+
+            if (!geoData.length) {
+                throw new Error("Không tìm thấy địa điểm!");
+            }
+
+            const lat = geoData[0].lat;
+            const lon = geoData[0].lon;
+            const displayName = geoData[0].display_name;
+
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=vi`;
+            const weatherRes = await fetch(weatherUrl);
+            const weather = await weatherRes.json();
+
+            weatherInfo.style.display = "block";
+            document.getElementById("locationName").textContent = displayName;
+            document.getElementById("temperature").textContent = `Nhiệt độ: ${Math.round(weather.main.temp)}°C`;
+            document.getElementById("description").textContent = `Thời tiết: ${weather.weather[0].description}`;
+            document.getElementById("humidity").textContent = `Độ ẩm: ${weather.main.humidity}%`;
+            document.getElementById("wind").textContent = `Tốc độ gió: ${weather.wind.speed} m/s`;
+            document.getElementById("weatherIcon").src = `https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`;
+
+            suggestActivities(weather.weather[0].main, weather.main.temp);
+
+        } catch (err) {
+            locationInput.classList.add('error');
+            container.classList.add('error-container');
+            errorMessage.textContent = "Lỗi: " + err.message;
+            weatherInfo.style.display = 'none';
+            console.error(err);
+        }
+    }
+
+    function suggestActivities(weather, temp) {
+        const suggestionList = document.getElementById('suggestionList');
+        suggestionList.innerHTML = '';
+
+        let suggestions = [];
+        if (weather.includes('Rain')) {
+            suggestions = [
+                'Ở nhà xem phim hoặc đọc sách.',
+                'Chuẩn bị ô và áo mưa nếu cần ra ngoài.',
+                'Thưởng thức một tách trà nóng.',
+                'Hòa mình vào những giai điệu êm dịu.'
+            ];
+        } else if (weather.includes('Clear')) {
+            suggestions = [
+                'Đi dạo công viên hoặc tập thể dục ngoài trời.',
+                'Tổ chức một buổi picnic cùng bạn bè.',
+                'Chụp ảnh phong cảnh dưới ánh nắng.',
+                'Chăm sóc cây cối hoặc trồng thêm hoa và rau.'
+            ];
+        } else if (weather.includes('Clouds')) {
+            suggestions = [
+                'Thăm bảo tàng hoặc triển lãm nghệ thuật.',
+                'Đi cà phê với bạn bè.',
+                'Tập yoga trong nhà để thư giãn.',
+                'Học vẽ, viết, làm đồ thủ công.'
+            ];
+        } else if (weather.includes('Snow')) {
+            suggestions = [
+                'Xây người tuyết hoặc chơi ném tuyết.',
+                'Giữ ấm với quần áo dày và khăn quàng.',
+                'Uống chocolate nóng bên lò sưởi.'
+            ];
+        }
+
+        if (temp > 30) {
+            suggestions.push('Uống đủ nước và tránh tiếp xúc trực tiếp với ánh nắng trong thời gian dài.');
+        } else if (temp < 10) {
+            suggestions.push('Mặc nhiều lớp áo, uống nước ấm và tránh gió lạnh.');
+        }
+
+        suggestions.forEach(suggestion => {
+            const li = document.createElement('li');
+            li.textContent = suggestion;
+            suggestionList.appendChild(li);
+        });
+    }
+  </script>
 </body>
 </html>
